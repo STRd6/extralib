@@ -1,0 +1,11 @@
+{
+  "author": "STRd6",
+  "main": null,
+  "name": "extralib",
+  "library": true,
+  "directories": {
+    "lib": "lib",
+    "source": "src",
+    "test": "test"
+  }
+}
