@@ -1,24 +1,4 @@
-var App;
-App = {
-  "directories": {
-    "animations": "animations",
-    "data": "data",
-    "entities": "entities",
-    "images": "images",
-    "lib": "lib",
-    "sounds": "sounds",
-    "source": "src",
-    "test": "test",
-    "tilemaps": "tilemaps"
-  },
-  "width": 480,
-  "height": 320,
-  "library": false,
-  "main": "main",
-  "wrapMain": true,
-  "hotSwap": true,
-  "name": "extralib"
-};;
+;
 ;
 /**
 The Animated module, when included in a GameObject, gives the object 
@@ -903,5 +883,4 @@ The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
   };
   return (typeof exports !== "undefined" && exports !== null ? exports : this)["Tilemap"] = Tilemap;
 })();;
-App.entities = {};;
-;$(function(){ undefined });
+;
