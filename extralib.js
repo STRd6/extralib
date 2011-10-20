@@ -414,6 +414,16 @@ the responsibility of the objects drawing on it to manage that themselves.
   /**
   The <code>Joysticks</code> module gives the engine access to joysticks.
 
+  <code><pre>
+  # First you need to add the joysticks module to the engine
+  window.engine = Engine
+    ...
+    includedModules: ["Joysticks"]
+  # Then you need to get a controller reference
+  # id = 0 for player 1, etc.
+  engine.controller(id)
+  </pre></code>
+
   @name Joysticks
   @fieldOf Engine
   @module
