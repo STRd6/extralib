@@ -421,7 +421,16 @@ the responsibility of the objects drawing on it to manage that themselves.
     includedModules: ["Joysticks"]
   # Then you need to get a controller reference
   # id = 0 for player 1, etc.
-  engine.controller(id)
+  controller = engine.controller(id)
+
+  # Point indicating direction primary axis is held
+  direction = controller.position()
+
+  # Check if buttons are held
+  controller.actionDown("A")
+  controller.actionDown("B")
+  controller.actionDown("X")
+  controller.actionDown("Y")
   </pre></code>
 
   @name Joysticks
