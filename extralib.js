@@ -441,7 +441,6 @@ the responsibility of the objects drawing on it to manage that themselves.
   @param {Object} self Reference to the engine
   */  return Engine.Joysticks = function(I, self) {
     Joysticks.init();
-    log(Joysticks.status());
     self.bind("update", function() {
       Joysticks.init();
       return Joysticks.update();
