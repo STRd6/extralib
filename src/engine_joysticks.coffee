@@ -30,7 +30,6 @@
   ###
   Engine.Joysticks = (I, self) ->
     Joysticks.init()
-    log Joysticks.status()
 
     self.bind "update", ->
       # Handle hotswapping, does nothing if already initialized
