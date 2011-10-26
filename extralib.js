@@ -366,6 +366,7 @@ The <code>FPSCounter</code> module tracks and displays the framerate.
 window.engine = Engine
   ...
   includedModules: ["FPSCounter"]
+  FPSColor: "#080"
 </pre></code>
 
 @name FPSCounter
@@ -377,7 +378,8 @@ window.engine = Engine
 */Engine.FPSCounter = function(I, self) {
   var framerate;
   Object.reverseMerge(I, {
-    showFPS: true
+    showFPS: true,
+    FPSColor: "#FFF"
   });
   framerate = Framerate({
     noDOM: true
@@ -386,7 +388,7 @@ window.engine = Engine
     if (I.showFPS) {
       canvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace");
       canvas.drawText({
-        color: "#FFF",
+        color: I.FPSColor,
         position: Point(6, 18),
         text: "fps: " + framerate.fps
       });
