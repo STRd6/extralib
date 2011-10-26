@@ -362,6 +362,12 @@ Animated = function(I, self) {
 /**
 The <code>FPSCounter</code> module tracks and displays the framerate.
 
+<code><pre>
+window.engine = Engine
+  ...
+  includedModules: ["FPSCounter"]
+</pre></code>
+
 @name FPSCounter
 @fieldOf Engine
 @module
