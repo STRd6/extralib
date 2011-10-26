@@ -5,6 +5,7 @@ The <code>FPSCounter</code> module tracks and displays the framerate.
 window.engine = Engine
   ...
   includedModules: ["FPSCounter"]
+  FPSColor: "#080"
 </pre></code>
 
 @name FPSCounter
@@ -17,6 +18,7 @@ window.engine = Engine
 Engine.FPSCounter = (I, self) ->
   Object.reverseMerge I,
     showFPS: true
+    FPSColor: "#FFF"
 
   framerate = Framerate
     noDOM: true
@@ -26,7 +28,7 @@ Engine.FPSCounter = (I, self) ->
       canvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace")
 
       canvas.drawText
-        color: "#FFF"
+        color: I.FPSColor
         position: Point(6, 18)
         text: "fps: #{framerate.fps}"
 
