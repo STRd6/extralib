@@ -371,12 +371,12 @@ The <code>FPSCounter</code> module tracks and displays the framerate.
 */Engine.FPSCounter = function(I, self) {
   var framerate;
   Object.reverseMerge(I, {
-    showFPS: false
+    showFPS: true
   });
   framerate = Framerate({
     noDOM: true
   });
-  return self.bind("draw", function(canvas) {
+  return self.bind("overlay", function(canvas) {
     if (I.showFPS) {
       canvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace");
       canvas.fillColor("#FFF");
