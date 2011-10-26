@@ -18,8 +18,11 @@ Engine.FPSCounter = (I, self) ->
   self.bind "overlay", (canvas) ->
     if I.showFPS
       canvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace")
-      canvas.fillColor("#FFF")
-      canvas.fillText("fps: " + framerate.fps, 6, 18)
+
+      canvas.drawText
+        color: "#FFF"
+        position: Point(6, 18)
+        text: "fps: #{framerate.fps}"
 
     framerate.rendered()
 
