@@ -10,12 +10,12 @@ The <code>FPSCounter</code> module tracks and displays the framerate.
 ###
 Engine.FPSCounter = (I, self) ->
   Object.reverseMerge I,
-    showFPS: false
+    showFPS: true
 
   framerate = Framerate
     noDOM: true
 
-  self.bind "draw", (canvas) ->
+  self.bind "overlay", (canvas) ->
     if I.showFPS
       canvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace")
       canvas.fillColor("#FFF")
