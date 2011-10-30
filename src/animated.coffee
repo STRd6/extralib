@@ -13,7 +13,7 @@ methods to transition from one animation state to another
 Animated = (I, self) ->  
   I ||= {}
 
-  $.reverseMerge I,
+  Object.reverseMerge I,
     animationName: I.class?.underscore()
     data:
       version: ""
