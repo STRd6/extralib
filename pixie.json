@@ -1,1 +1,1 @@
-{"author":"STRd6","main":null,"name":"extralib","library":true,"directories":{"lib":"lib","source":"src","test":"test"},"test_libs":{"gamelib.js":"https://raw.github.com/STRd6/gamelib/pixie/gamelib.js"}}
+{"author":"STRd6","main":null,"name":"extralib","library":true,"directories":{"lib":"lib","source":"src","test":"test","test_lib":"test_lib"},"test_libs":{"gamelib.js":"https://raw.github.com/STRd6/gamelib/pixie/gamelib.js"}}
