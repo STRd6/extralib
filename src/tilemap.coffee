@@ -20,8 +20,8 @@
               entityData = Object.extend(
                 layer: layerIndex
                 sprite: spriteLookup[uuid]
-                x: x
-                y: y
+                x: x + tileWidth/2 # Centered Coordinates
+                y: y + tileHeight/2 # Centered Coordinates
               , App.entities[uuid] # Global entity properties
               #TODO: Maybe map specific properties?
               , entity.properties) # Instance properties
@@ -82,3 +82,4 @@
 
   (exports ? this)["Tilemap"] = Tilemap
 )()
+
