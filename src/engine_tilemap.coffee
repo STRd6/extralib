@@ -13,7 +13,7 @@ Engine.Tilemap = (I, self) ->
   updating = false
   clearObjects = false
 
-  self.bind "preDraw", (canvas) ->
+  self.bind "beforeDraw", (canvas) ->
     map?.draw canvas
 
   self.bind "update", ->
@@ -24,7 +24,7 @@ Engine.Tilemap = (I, self) ->
 
     if clearObjects
       #TODO: Clear these out in a more graceful way, triggering unload events
-      I.objects.clear()
+      self.objects().clear()
       clearObjects = false
 
   ###*
