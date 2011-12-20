@@ -1,5 +1,6 @@
 ;
 ;
+
 /**
 The Animated module, when included in a GameObject, gives the object 
 methods to transition from one animation state to another
@@ -10,11 +11,14 @@ methods to transition from one animation state to another
 
 @param {Object} I Instance variables
 @param {Object} self Reference to including object
-*/var Animated;
+*/
+
+var Animated;
+
 Animated = function(I, self) {
   var advanceFrame, find, initializeState, loadByName, updateSprite, _name, _ref;
   I || (I = {});
-  $.reverseMerge(I, {
+  Object.reverseMerge(I, {
     animationName: (_ref = I["class"]) != null ? _ref.underscore() : void 0,
     data: {
       version: "",
@@ -126,9 +130,7 @@ Animated = function(I, self) {
     result = null;
     nameLower = name.toLowerCase();
     I.data.animations.each(function(animation) {
-      if (animation.name.toLowerCase() === nameLower) {
-        return result = animation;
-      }
+      if (animation.name.toLowerCase() === nameLower) return result = animation;
     });
     return result;
   };
@@ -146,9 +148,7 @@ Animated = function(I, self) {
     */
     transition: function(newState, force) {
       var toNextState;
-      if (newState === I.activeAnimation.name) {
-        return;
-      }
+      if (newState === I.activeAnimation.name) return;
       toNextState = function(state) {
         var firstFrame, firstSprite, nextState;
         if (nextState = find(state)) {
@@ -200,7 +200,9 @@ Animated = function(I, self) {
       }
     }
   };
-};;
+};
+;
+
 (function() {
   var Animation, fromPixieId;
   Animation = function(data) {
@@ -259,106 +261,9 @@ Animated = function(I, self) {
     return proxy;
   };
   return window.Animation.fromPixieId = fromPixieId;
-})();;
-(function($) {
-  /**
-  The <code>Developer</code> module provides a debug overlay and methods for debugging and live coding.
+})();
+;
 
-  @name Developer
-  @fieldOf Engine
-  @module
-
-  @param {Object} I Instance variables
-  @param {Object} self Reference to the engine
-  */  var developerHotkeys, developerMode, developerModeMousedown, namespace, objectToUpdate;
-  Engine.Developer = function(I, self) {
-    var boxHeight, boxWidth, font, lineHeight, margin, screenHeight, screenWidth, textStart;
-    screenWidth = (typeof App !== "undefined" && App !== null ? App.width : void 0) || 480;
-    screenHeight = (typeof App !== "undefined" && App !== null ? App.height : void 0) || 320;
-    margin = 10;
-    boxWidth = 240;
-    boxHeight = 60;
-    textStart = screenWidth - boxWidth + margin;
-    font = "bold 9pt arial";
-    lineHeight = 16;
-    self.bind("draw", function(canvas) {
-      if (I.paused) {
-        canvas.withTransform(I.cameraTransform, function(canvas) {
-          return I.objects.each(function(object) {
-            canvas.fillColor('rgba(255, 0, 0, 0.5)');
-            return canvas.fillRect(object.bounds().x, object.bounds().y, object.bounds().width, object.bounds().height);
-          });
-        });
-        canvas.font(font);
-        canvas.fillColor('rgba(0, 0, 0, 0.5)');
-        canvas.fillRect(screenWidth - boxWidth, 0, boxWidth, boxHeight);
-        canvas.fillColor('#fff');
-        canvas.fillText("Developer Mode. Press Esc to resume", textStart, margin + 5);
-        canvas.fillText("Shift+Left click to add boxes", textStart, margin + 5 + lineHeight);
-        return canvas.fillText("Right click red boxes to edit properties", textStart, margin + 5 + 2 * lineHeight);
-      }
-    });
-    self.bind("init", function() {
-      var fn, key, _results;
-      window.updateObjectProperties = function(newProperties) {
-        if (objectToUpdate) {
-          return Object.extend(objectToUpdate, GameObject.construct(newProperties));
-        }
-      };
-      $(document).unbind("." + namespace);
-      $(document).bind("mousedown." + namespace, developerModeMousedown);
-      _results = [];
-      for (key in developerHotkeys) {
-        fn = developerHotkeys[key];
-        _results.push((function(key, fn) {
-          return $(document).bind("keydown." + namespace, key, function(event) {
-            event.preventDefault();
-            return fn();
-          });
-        })(key, fn));
-      }
-      return _results;
-    });
-    return {};
-  };
-  namespace = "engine_developer";
-  developerMode = false;
-  objectToUpdate = null;
-  developerModeMousedown = function(event) {
-    var object;
-    if (developerMode) {
-      console.log(event.which);
-      if (event.which === 3) {
-        if (object = engine.objectAt(event.pageX, event.pageY)) {
-          parent.editProperties(object.I);
-          objectToUpdate = object;
-        }
-        return console.log(object);
-      } else if (event.which === 2 || keydown.shift) {
-        return typeof window.developerAddObject === "function" ? window.developerAddObject(event) : void 0;
-      }
-    }
-  };
-  return developerHotkeys = {
-    esc: function() {
-      developerMode = !developerMode;
-      if (developerMode) {
-        return engine.pause();
-      } else {
-        return engine.play();
-      }
-    },
-    f3: function() {
-      return Local.set("level", engine.saveState());
-    },
-    f4: function() {
-      return engine.loadState(Local.get("level"));
-    },
-    f5: function() {
-      return engine.reload();
-    }
-  };
-})(jQuery);;
 /**
 The <code>FPSCounter</code> module tracks and displays the framerate.
 
@@ -375,7 +280,9 @@ window.engine = Engine
 
 @param {Object} I Instance variables
 @param {Object} self Reference to the engine
-*/Engine.FPSCounter = function(I, self) {
+*/
+
+Engine.FPSCounter = function(I, self) {
   var framerate;
   Object.reverseMerge(I, {
     showFPS: true,
@@ -395,32 +302,9 @@ window.engine = Engine
     }
     return framerate.rendered();
   });
-};;
-/**
-The <code>HUD</code> module provides an extra canvas to draw to. GameObjects that respond to the
-<code>drawHUD</code> method will draw to the HUD canvas. The HUD canvas is not cleared each frame, it is
-the responsibility of the objects drawing on it to manage that themselves.
+};
+;
 
-@name HUD
-@fieldOf Engine
-@module
-
-@param {Object} I Instance variables
-@param {Object} self Reference to the engine
-*/Engine.HUD = function(I, self) {
-  var hudCanvas;
-  hudCanvas = $("<canvas width=" + App.width + " height=" + App.height + " />").powerCanvas();
-  hudCanvas.font("bold 9pt consolas, 'Courier New', 'andale mono', 'lucida console', monospace");
-  self.bind("draw", function(canvas) {
-    var hud;
-    I.objects.each(function(object) {
-      return typeof object.drawHUD === "function" ? object.drawHUD(hudCanvas) : void 0;
-    });
-    hud = hudCanvas.element();
-    return canvas.drawImage(hud, 0, 0, hud.width, hud.height, 0, 0, hud.width, hud.height);
-  });
-  return {};
-};;
 (function($) {
   /**
   The <code>Joysticks</code> module gives the engine access to joysticks.
@@ -470,42 +354,9 @@ the responsibility of the objects drawing on it to manage that themselves.
       }
     };
   };
-})();;
-/**
-The <code>Shadows</code> module provides a lighting extension to the Engine. Objects that have
-an illuminate method will add light to the scene. Objects that have an true opaque attribute will cast
-shadows.
+})();
+;
 
-@name Shadows
-@fieldOf Engine
-@module
-
-@param {Object} I Instance variables
-@param {Object} self Reference to the engine
-*/Engine.Shadows = function(I, self) {
-  var shadowCanvas;
-  shadowCanvas = $("<canvas width=640 height=480 />").powerCanvas();
-  self.bind("draw", function(canvas) {
-    var shadows;
-    if (I.ambientLight < 1) {
-      shadowCanvas.compositeOperation("source-over");
-      shadowCanvas.clear();
-      shadowCanvas.fill("rgba(0, 0, 0, " + (1 - I.ambientLight) + ")");
-      shadowCanvas.compositeOperation("destination-out");
-      shadowCanvas.withTransform(I.cameraTransform, function(shadowCanvas) {
-        return I.objects.each(function(object, i) {
-          if (object.illuminate) {
-            shadowCanvas.globalAlpha(1);
-            return object.illuminate(shadowCanvas);
-          }
-        });
-      });
-      shadows = shadowCanvas.element();
-      return canvas.drawImage(shadows, 0, 0, shadows.width, shadows.height, 0, 0, shadows.width, shadows.height);
-    }
-  });
-  return {};
-};;
 /**
 The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
 
@@ -515,12 +366,14 @@ The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
 
 @param {Object} I Instance variables
 @param {Object} self Reference to the engine
-*/Engine.Tilemap = function(I, self) {
+*/
+
+Engine.Tilemap = function(I, self) {
   var clearObjects, map, updating;
   map = null;
   updating = false;
   clearObjects = false;
-  self.bind("preDraw", function(canvas) {
+  self.bind("beforeDraw", function(canvas) {
     return map != null ? map.draw(canvas) : void 0;
   });
   self.bind("update", function() {
@@ -529,7 +382,7 @@ The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
   self.bind("afterUpdate", function() {
     updating = false;
     if (clearObjects) {
-      I.objects.clear();
+      self.objects().clear();
       return clearObjects = false;
     }
   });
@@ -549,7 +402,9 @@ The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
       });
     }
   };
-};;
+};
+;
+
 /**
 This object keeps track of framerate and displays it by creating and appending an
 html element to the DOM.
@@ -558,7 +413,10 @@ Once created you call snapshot at the end of every rendering cycle.
 
 @name Framerate
 @constructor
-*/var Framerate;
+*/
+
+var Framerate;
+
 Framerate = function(options) {
   var element, framerateUpdateInterval, framerates, numFramerates, renderTime, self, updateFramerate;
   options || (options = {});
@@ -588,9 +446,7 @@ Framerate = function(options) {
     }
     framerate = (tot / framerates.length).round();
     self.fps = framerate;
-    if (element) {
-      return element.innerHTML = "fps: " + framerate;
-    }
+    if (element) return element.innerHTML = "fps: " + framerate;
   };
   setInterval(updateFramerate, framerateUpdateInterval);
   /**
@@ -616,7 +472,9 @@ Framerate = function(options) {
       }
     }
   };
-};;
+};
+;
+
 (function() {
   var Map, Tilemap, fromPixieId, loadByName;
   Map = function(data, entityCallback) {
@@ -630,9 +488,7 @@ Framerate = function(options) {
       spriteLookup[uuid] = Sprite.fromURL(entity.tileSrc);
     }
     loadEntities = function() {
-      if (!entityCallback) {
-        return;
-      }
+      if (!entityCallback) return;
       return data.layers.each(function(layer, layerIndex) {
         var entities, entity, entityData, x, y, _i, _len, _results;
         if (layer.name.match(/entities/i)) {
@@ -644,8 +500,8 @@ Framerate = function(options) {
               entityData = Object.extend({
                 layer: layerIndex,
                 sprite: spriteLookup[uuid],
-                x: x,
-                y: y
+                x: x + tileWidth / 2,
+                y: y + tileHeight / 2
               }, App.entities[uuid], entity.properties);
               _results.push(entityCallback(entityData));
             }
@@ -659,9 +515,7 @@ Framerate = function(options) {
       draw: function(canvas, x, y) {
         return canvas.withTransform(Matrix.translation(x, y), function() {
           return data.layers.each(function(layer) {
-            if (layer.name.match(/entities/i)) {
-              return;
-            }
+            if (layer.name.match(/entities/i)) return;
             return layer.tiles.each(function(row, y) {
               return row.each(function(uuid, x) {
                 var sprite;
@@ -712,5 +566,6 @@ Framerate = function(options) {
     }
   };
   return (typeof exports !== "undefined" && exports !== null ? exports : this)["Tilemap"] = Tilemap;
-})();;
+})();
+;
 ;
