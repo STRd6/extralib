@@ -11,59 +11,35 @@
     loadEntities = () ->
       return unless entityCallback
 
+      console.log data
+
       data.layers.each (layer, layerIndex) ->
-        if layer.name.match /entities/i
-          if entities = layer.entities
-            for entity in entities
-              {x, y, uuid} = entity
+        if instances = layer.instances
+          for instance in instances
+            {x, y, uuid} = instance
 
-              entityData = Object.extend(
-                layer: layerIndex
-                sprite: spriteLookup[uuid]
-                x: x + tileWidth/2 # Centered Coordinates
-                y: y + tileHeight/2 # Centered Coordinates
-              , App.entities[uuid] # Global entity properties
-              #TODO: Maybe map specific properties?
-              , entity.properties) # Instance properties
+            instanceData = Object.extend(
+              layer: layerIndex
+              sprite: spriteLookup[uuid]
+              x: x + tileWidth/2 # Centered Coordinates
+              y: y + tileHeight/2 # Centered Coordinates
+            , App.entities[uuid] # Global entity properties
+            #TODO: Maybe map specific properties?
+            , instance.properties) # Instance properties
 
-              entityCallback(entityData)
+            entityCallback(instanceData)
 
     loadEntities()
 
-    Object.extend data,
-      draw: (canvas, x, y) ->
-        canvas.withTransform Matrix.translation(x, y), () ->
-          data.layers.each (layer) ->
-            return if layer.name.match /entities/i
-
-            layer.tiles.each (row, y) ->
-              row.each (uuid, x) ->
-                if sprite = spriteLookup[uuid]
-                  sprite.draw(canvas, x * tileWidth, y * tileHeight)
+    data
 
   Tilemap = (name, callback, entityCallback) ->
     fromPixieId(App.Tilemaps[name], callback, entityCallback)
 
-  fromPixieId = (id, callback, entityCallback) ->
-    url = "http://pixieengine.com/s3/tilemaps/#{id}/data.json"
-
-    proxy =
-      draw: ->
-
-    $.getJSON url, (data) ->
-      Object.extend(proxy, Map(data, entityCallback))
-
-      callback? proxy
-
-    return proxy
-
   loadByName = (name, callback, entityCallback) ->
-    #TODO: Better cachebusting
-    directory = App?.directories?.tilemaps || "data"
-    url = "#{BASE_URL}/#{directory}/#{name}.tilemap?#{new Date().getTime()}"
+    url = ResourceLoader.urlFor("tilemaps", name)
 
-    proxy =
-      draw: ->
+    proxy = {}
 
     $.getJSON url, (data) ->
       Object.extend(proxy, Map(data, entityCallback))
@@ -71,8 +47,6 @@
       callback? proxy
 
     return proxy
-
-  Tilemap.fromPixieId = fromPixieId
 
   Tilemap.load = (options) ->
     if options.pixieId
@@ -82,4 +56,3 @@
 
   (exports ? this)["Tilemap"] = Tilemap
 )()
-
