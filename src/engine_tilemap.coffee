@@ -13,9 +13,6 @@ Engine.Tilemap = (I, self) ->
   updating = false
   clearObjects = false
 
-  self.bind "beforeDraw", (canvas) ->
-    map?.draw canvas
-
   self.bind "update", ->
     updating = true 
 
@@ -40,4 +37,3 @@ Engine.Tilemap = (I, self) ->
       name: name
       complete: complete
       entity: self.add
-
