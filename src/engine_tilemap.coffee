@@ -14,7 +14,7 @@ Engine.Tilemap = (I, self) ->
   clearObjects = false
 
   self.bind "update", ->
-    updating = true 
+    updating = true
 
   self.bind "afterUpdate", ->
     updating = false
