@@ -1,6 +1,5 @@
 ;
 ;
-
 /**
 The Animated module, when included in a GameObject, gives the object 
 methods to transition from one animation state to another
@@ -12,7 +11,6 @@ methods to transition from one animation state to another
 @param {Object} I Instance variables
 @param {Object} self Reference to including object
 */
-
 var Animated;
 
 Animated = function(I, self) {
@@ -263,7 +261,6 @@ Animated = function(I, self) {
   return window.Animation.fromPixieId = fromPixieId;
 })();
 ;
-
 /**
 The <code>FPSCounter</code> module tracks and displays the framerate.
 
@@ -281,7 +278,6 @@ window.engine = Engine
 @param {Object} I Instance variables
 @param {Object} self Reference to the engine
 */
-
 Engine.FPSCounter = function(I, self) {
   var framerate;
   Object.reverseMerge(I, {
@@ -356,7 +352,6 @@ Engine.FPSCounter = function(I, self) {
   };
 })();
 ;
-
 /**
 The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
 
@@ -367,15 +362,11 @@ The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
 @param {Object} I Instance variables
 @param {Object} self Reference to the engine
 */
-
 Engine.Tilemap = function(I, self) {
   var clearObjects, map, updating;
   map = null;
   updating = false;
   clearObjects = false;
-  self.bind("beforeDraw", function(canvas) {
-    return map != null ? map.draw(canvas) : void 0;
-  });
   self.bind("update", function() {
     return updating = true;
   });
@@ -404,7 +395,6 @@ Engine.Tilemap = function(I, self) {
   };
 };
 ;
-
 /**
 This object keeps track of framerate and displays it by creating and appending an
 html element to the DOM.
@@ -414,7 +404,6 @@ Once created you call snapshot at the end of every rendering cycle.
 @name Framerate
 @constructor
 */
-
 var Framerate;
 
 Framerate = function(options) {
@@ -476,7 +465,7 @@ Framerate = function(options) {
 ;
 
 (function() {
-  var Map, Tilemap, fromPixieId, loadByName;
+  var Map, Tilemap, loadByName;
   Map = function(data, entityCallback) {
     var entity, loadEntities, spriteLookup, tileHeight, tileWidth, uuid, _ref;
     tileHeight = data.tileHeight;
@@ -489,75 +478,42 @@ Framerate = function(options) {
     }
     loadEntities = function() {
       if (!entityCallback) return;
+      console.log(data);
       return data.layers.each(function(layer, layerIndex) {
-        var entities, entity, entityData, x, y, _i, _len, _results;
-        if (layer.name.match(/entities/i)) {
-          if (entities = layer.entities) {
-            _results = [];
-            for (_i = 0, _len = entities.length; _i < _len; _i++) {
-              entity = entities[_i];
-              x = entity.x, y = entity.y, uuid = entity.uuid;
-              entityData = Object.extend({
-                layer: layerIndex,
-                sprite: spriteLookup[uuid],
-                x: x + tileWidth / 2,
-                y: y + tileHeight / 2
-              }, App.entities[uuid], entity.properties);
-              _results.push(entityCallback(entityData));
-            }
-            return _results;
+        var instance, instanceData, instances, x, y, _i, _len, _results;
+        if (instances = layer.instances) {
+          _results = [];
+          for (_i = 0, _len = instances.length; _i < _len; _i++) {
+            instance = instances[_i];
+            x = instance.x, y = instance.y, uuid = instance.uuid;
+            instanceData = Object.extend({
+              layer: layerIndex,
+              sprite: spriteLookup[uuid],
+              x: x + tileWidth / 2,
+              y: y + tileHeight / 2
+            }, App.entities[uuid], instance.properties);
+            _results.push(entityCallback(instanceData));
           }
+          return _results;
         }
       });
     };
     loadEntities();
-    return Object.extend(data, {
-      draw: function(canvas, x, y) {
-        return canvas.withTransform(Matrix.translation(x, y), function() {
-          return data.layers.each(function(layer) {
-            if (layer.name.match(/entities/i)) return;
-            return layer.tiles.each(function(row, y) {
-              return row.each(function(uuid, x) {
-                var sprite;
-                if (sprite = spriteLookup[uuid]) {
-                  return sprite.draw(canvas, x * tileWidth, y * tileHeight);
-                }
-              });
-            });
-          });
-        });
-      }
-    });
+    return data;
   };
   Tilemap = function(name, callback, entityCallback) {
     return fromPixieId(App.Tilemaps[name], callback, entityCallback);
   };
-  fromPixieId = function(id, callback, entityCallback) {
-    var proxy, url;
-    url = "http://pixieengine.com/s3/tilemaps/" + id + "/data.json";
-    proxy = {
-      draw: function() {}
-    };
-    $.getJSON(url, function(data) {
-      Object.extend(proxy, Map(data, entityCallback));
-      return typeof callback === "function" ? callback(proxy) : void 0;
-    });
-    return proxy;
-  };
   loadByName = function(name, callback, entityCallback) {
-    var directory, proxy, url, _ref;
-    directory = (typeof App !== "undefined" && App !== null ? (_ref = App.directories) != null ? _ref.tilemaps : void 0 : void 0) || "data";
-    url = "" + BASE_URL + "/" + directory + "/" + name + ".tilemap?" + (new Date().getTime());
-    proxy = {
-      draw: function() {}
-    };
+    var proxy, url;
+    url = ResourceLoader.urlFor("tilemaps", name);
+    proxy = {};
     $.getJSON(url, function(data) {
       Object.extend(proxy, Map(data, entityCallback));
       return typeof callback === "function" ? callback(proxy) : void 0;
     });
     return proxy;
   };
-  Tilemap.fromPixieId = fromPixieId;
   Tilemap.load = function(options) {
     if (options.pixieId) {
       return fromPixieId(options.pixieId, options.complete, options.entity);
