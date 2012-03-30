@@ -7,21 +7,7 @@ Once created you call snapshot at the end of every rendering cycle.
 @name Framerate
 @constructor
 ###
-Framerate = (options) ->
-  options ||= {}
-
-  unless options.noDOM
-    element = $("<div>",
-      css:
-        color: "#FFF"
-        fontFamily: "consolas, 'Courier New', 'andale mono', 'lucida console', monospace"
-        fontWeight: "bold"
-        paddingLeft: 4
-        position: "fixed"
-        top: 0
-        left: 0
-    ).appendTo('body').get(0)
-
+Framerate = (options={}) ->
   numFramerates = 15
   framerateUpdateInterval = 250
 
@@ -29,14 +15,7 @@ Framerate = (options) ->
   framerates = [ ]
 
   updateFramerate = ->
-    tot = 0
-    for rate in framerates
-      tot += rate
-
-    framerate = (tot / framerates.length).round()
-
-    self.fps = framerate
-    element.innerHTML = "fps: " + framerate if element
+    self.fps = framerates.average().round()
 
   setInterval(updateFramerate, framerateUpdateInterval)
 

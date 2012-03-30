@@ -2,6 +2,26 @@
 ;
 ;
 /**
+Calculate the average value of an array. Returns undefined if some elements
+are not numbers.
+
+<code><pre>
+[1, 3, 5, 7].average()
+# => 4
+</pre></code>
+
+@name average
+@methodOf Array#
+@returns {Number} The average (arithmetic mean) of the list of numbers.
+*/
+var _base,
+  __slice = Array.prototype.slice;
+
+Array.prototype.average = function() {
+  return this.sum() / this.length;
+};
+
+/**
 Returns a copy of the array without null and undefined values.
 
 <code><pre>
@@ -13,8 +33,6 @@ Returns a copy of the array without null and undefined values.
 @methodOf Array#
 @returns {Array} A new array that contains only the non-null values.
 */
-var _base,
-  __slice = Array.prototype.slice;
 
 Array.prototype.compact = function() {
   return this.select(function(element) {
@@ -4807,7 +4825,17 @@ The <code>Fade</code> module provides convenience methods for accessing common E
 @see Camera.Flash
 */
 Camera.Fade = function(I, self) {
-  var configureFade;
+  var configureFade, fadeInDefaults, fadeOutDefaults;
+  fadeInDefaults = {
+    alpha: 0,
+    color: 'black',
+    duration: 30
+  };
+  fadeOutDefaults = {
+    alpha: 1,
+    color: 'transparent',
+    duration: 30
+  };
   configureFade = function(duration, color, alpha) {
     I.flashDuration = duration;
     I.flashCooldown = duration;
@@ -4832,10 +4860,11 @@ Camera.Fade = function(I, self) {
     @param {Number} [duration=30] How long the effect lasts
     @param {Color} [color="black"] The color to fade from
     */
-    fadeIn: function(duration, color) {
-      if (duration == null) duration = 30;
-      if (color == null) color = 'black';
-      return configureFade(duration, color, 0);
+    fadeIn: function(options) {
+      var alpha, color, duration, _ref;
+      if (options == null) options = {};
+      _ref = Object.reverseMerge(options, fadeInDefaults), alpha = _ref.alpha, color = _ref.color, duration = _ref.duration;
+      return configureFade(duration, color, alpha);
     },
     /**
     A convenient way to set the flash effect instance variables. This provides a shorthand for fading 
@@ -4854,10 +4883,11 @@ Camera.Fade = function(I, self) {
     @param {Number} [duration=30] How long the effect lasts
     @param {Color} [color="transparent"] The color to fade to
     */
-    fadeOut: function(duration, color) {
-      if (duration == null) duration = 30;
-      if (color == null) color = 'transparent';
-      return configureFade(duration, color, 1);
+    fadeOut: function(options) {
+      var alpha, color, duration, _ref;
+      if (options == null) options = {};
+      _ref = Object.reverseMerge(options, fadeOutDefaults), alpha = _ref.alpha, color = _ref.color, duration = _ref.duration;
+      return configureFade(duration, color, alpha);
     }
   };
 };
@@ -5032,6 +5062,58 @@ Camera.ZSort = function(I, self) {
     return objects;
   });
   return {};
+};
+;
+/**
+The ClampBounds module adds a check to make sure
+that the including GameObject doesn't move outside
+the viewport.
+
+<code><pre>
+  # create a player and include ClampBounds
+  player = GameObject
+    includedModules: ["ClampBounds"]
+    width: 5
+    height: 17
+
+  # put the player outside the viewport
+  player.I.x = -400
+  player.I.y = 1000
+
+  # update the player so ClampBounds can set 
+  # his position back inside the viewport.
+  player.update()
+
+  # x, y position is based on the center point so
+  # the position the player is set to is based on
+  # half their width and height
+  player.I.x
+  # => 2.5 # half the player's width
+
+  player.I.y
+  # => 311.5 # The default App.height (320) - half the player's height
+</pre></code>
+
+@name Cooldown
+@module
+@constructor
+@param {Object} I Instance variables
+@param {Core} self Reference to including object
+*/
+var ClampBounds;
+
+ClampBounds = function(I, self) {
+  if (I == null) I = {};
+  Object.reverseMerge(I, {
+    x: 0,
+    y: 0,
+    width: 32,
+    height: 32
+  });
+  return self.bind("update", function() {
+    I.x = I.x.clamp(I.width / 2, App.width - I.width / 2);
+    return I.y = I.y.clamp(I.height / 2, App.height - I.height / 2);
+  });
 };
 ;
 
@@ -5369,6 +5451,21 @@ Camera.ZSort = function(I, self) {
     */
     rayRectangle: function(source, direction, target) {
       var areaPQ0, areaPQ1, hit, p0, p1, t, tX, tY, xval, xw, yval, yw, _ref, _ref2;
+      if (!((target.xw != null) && (target.yw != null))) {
+        if ((target.width != null) && (target.height != null)) {
+          xw = target.width / 2;
+          yw = target.height / 2;
+          return Collision.rayRectangle(source, direction, {
+            x: target.x + xw,
+            y: target.y + yw,
+            xw: xw,
+            yw: yw
+          });
+        } else {
+          error("Bounds object isn't a rectangle");
+          return;
+        }
+      }
       xw = target.xw;
       yw = target.yw;
       if (source.x < target.x) {
@@ -6637,6 +6734,121 @@ var __slice = Array.prototype.slice;
 })();
 ;
 /**
+The Controllable module adds simple movement
+when up, down, left, or right are held.
+
+<code><pre>
+  # create a player and include Controllable
+  player = GameObject
+    includedModules: ["Controllable"]
+    width: 5
+    height: 17
+    x: 15
+    y: 30
+    speed:  2
+
+  # hold the left arrow key, then
+  # update the player
+  player.update()
+
+  # the player is moved left according to his speed
+  player.I.x
+  # => 13
+</pre></code>
+
+@name Controllable
+@module
+@constructor
+@param {Object} I Instance variables
+@param {Core} self Reference to including object
+*/
+var Controllable;
+
+Controllable = function(I, self) {
+  if (I == null) I = {};
+  Object.reverseMerge(I, {
+    speed: 1
+  });
+  return self.bind("update", function() {
+    if (keydown.left) I.x -= I.speed;
+    if (keydown.right) I.x += I.speed;
+    if (keydown.up) I.y -= I.speed;
+    if (keydown.down) return I.y += I.speed;
+  });
+};
+;
+/**
+The Cooldown module provides a declarative way to manage cooldowns on
+GameObject's properties.
+
+<code><pre>
+# Health regeneration
+player = GameObject
+  health: 50
+
+player.cooldown "health",
+  target: 100
+
+player.update()
+</pre></code>
+
+<code><pre>
+# Shoot Timeout
+player = GameObject()
+
+player.cooldown "shootTimer"
+
+player.I.shootTimer = 10 # => Pew! Pew!
+
+player.I.update()
+
+player.I.shootTimer # => 9
+</pre></code>
+
+@name Cooldown
+@module
+@constructor
+@param {Object} I Instance variables
+@param {Core} self Reference to including object
+*/
+var Cooldown;
+
+Cooldown = function(I, self) {
+  Object.reverseMerge(I, {
+    cooldowns: {}
+  });
+  self.bind("update", function() {
+    var approachBy, cooldownOptions, name, target, _ref, _results;
+    _ref = I.cooldowns;
+    _results = [];
+    for (name in _ref) {
+      cooldownOptions = _ref[name];
+      approachBy = cooldownOptions.approachBy, target = cooldownOptions.target;
+      _results.push(I[name] = I[name].approach(target, approachBy));
+    }
+    return _results;
+  });
+  return {
+    cooldown: function(name, options) {
+      var approachBy, target, value;
+      if (options == null) options = {};
+      target = options.target, approachBy = options.approachBy, value = options.value;
+      target || (target = 0);
+      if (approachBy == null) approachBy = 1;
+      I.cooldowns[name] = {
+        target: target,
+        approachBy: approachBy
+      };
+      if (value != null) {
+        return I[name] = options.value;
+      } else {
+        if (!I[name]) return I[name] = 0;
+      }
+    }
+  };
+};
+;
+/**
 The Drawable module is used to provide a simple draw method to the including
 object.
 
@@ -6862,6 +7074,63 @@ Durable = function(I, self) {
   });
   return {};
 };
+;
+
+(function() {
+  var Easing, polynomialEasings;
+  Easing = {
+    sinusoidal: function(begin, end) {
+      var change;
+      change = end - begin;
+      return function(t) {
+        return begin + change * (1 - Math.cos(t * Math.TAU / 4));
+      };
+    },
+    sinusoidalOut: function(begin, end) {
+      var change;
+      change = end - begin;
+      return function(t) {
+        return begin + change * (0 + Math.sin(t * Math.TAU / 4));
+      };
+    }
+  };
+  polynomialEasings = ["linear", "quadratic", "cubic", "quartic", "quintic"];
+  polynomialEasings.each(function(easing, i) {
+    var exponent, sign;
+    exponent = i + 1;
+    sign = exponent % 2 ? 1 : -1;
+    Easing[easing] = function(begin, end) {
+      var change;
+      change = end - begin;
+      return function(t) {
+        return begin + change * Math.pow(t, exponent);
+      };
+    };
+    return Easing["" + easing + "Out"] = function(begin, end) {
+      var change;
+      change = end - begin;
+      return function(t) {
+        return begin + change * (1 + sign * Math.pow(t - 1, exponent));
+      };
+    };
+  });
+  ["sinusoidal"].concat(polynomialEasings).each(function(easing) {
+    return Easing["" + easing + "InOut"] = function(begin, end) {
+      var easeIn, easeOut, midpoint;
+      midpoint = (begin + end) / 2;
+      easeIn = Easing[easing](begin, midpoint);
+      easeOut = Easing["" + easing + "Out"](midpoint, end);
+      return function(t) {
+        if (t < 0.5) {
+          return easeIn(2 * t);
+        } else {
+          return easeOut(2 * t - 1);
+        }
+      };
+    };
+  });
+  return (typeof exports !== "undefined" && exports !== null ? exports : this)["Easing"] = Easing;
+})();
 ;
 var Emitter;
 
@@ -7199,7 +7468,7 @@ Emitterable = function(I, self) {
       draw: draw
     });
     self.include(Bindable);
-    defaultModules = ["Keyboard", "Clear", "Delay", "GameState", "Selector", "Collision"];
+    defaultModules = ["Keyboard", "Mouse", "Clear", "Delay", "GameState", "Selector", "Collision"];
     modules = defaultModules.concat(I.includedModules);
     modules = modules.without([].concat(I.excludedModules));
     modules.each(function(moduleName) {
@@ -7380,9 +7649,11 @@ Engine.GameState = function(I, self) {
     var previousState;
     if (requestedState != null) {
       I.currentState.trigger("exit", requestedState);
+      self.trigger('stateExited', I.currentState);
       previousState = I.currentState;
       I.currentState = requestedState;
       I.currentState.trigger("enter", previousState);
+      self.trigger('stateEntered', I.currentState);
       return requestedState = null;
     }
   });
@@ -7410,6 +7681,14 @@ Engine.GameState = function(I, self) {
       } else {
         return I.currentState.cameras();
       }
+    },
+    fadeIn: function(options) {
+      if (options == null) options = {};
+      return self.cameras().invoke('fadeIn', options);
+    },
+    fadeOut: function(options) {
+      if (options == null) options = {};
+      return self.cameras().invoke('fadeOut', options);
     },
     flash: function(options) {
       if (options == null) options = {};
@@ -7449,6 +7728,58 @@ This module sets up the keyboard inputs for each engine update.
 Engine.Keyboard = function(I, self) {
   self.bind("beforeUpdate", function() {
     return typeof updateKeys === "function" ? updateKeys() : void 0;
+  });
+  return {};
+};
+;
+
+Engine.Levels = function(I, self) {
+  var loadLevel;
+  Object.reverseMerge(I, {
+    levels: [],
+    currentLevel: -1
+  });
+  I.transitioning = false;
+  loadLevel = function(level) {
+    var levelState;
+    if (!I.transitioning) {
+      I.transitioning = true;
+      levelState = LevelState({
+        level: level
+      });
+      return engine.setState(levelState);
+    }
+  };
+  return {
+    nextLevel: function() {
+      var level;
+      if (!I.transitioning) {
+        I.currentLevel += 1;
+        if (level = I.levels[I.currentLevel]) {
+          return loadLevel(level);
+        } else {
+          return engine.setState(GameOver());
+        }
+      }
+    },
+    goToLevel: function(level) {
+      return loadLevel(level);
+    }
+  };
+};
+;
+/**
+This module sets up the mouse inputs for each engine update.
+
+@name Mouse
+@fieldOf Engine
+@module
+@param {Object} I Instance variables
+@param {Object} self Reference to the engine
+*/
+Engine.Mouse = function(I, self) {
+  self.bind("beforeUpdate", function() {
+    return typeof updateMouse === "function" ? updateMouse() : void 0;
   });
   return {};
 };
@@ -7597,6 +7928,49 @@ Engine.Stats = function(I, self) {
 };
 ;
 /**
+The <code>Tilemap</code> module provides a way to load tilemaps in the engine.
+
+@name Tilemap
+@fieldOf Engine
+@module
+
+@param {Object} I Instance variables
+@param {Object} self Reference to the engine
+*/
+Engine.Tilemap = function(I, self) {
+  var clearObjects, map, updating;
+  map = null;
+  updating = false;
+  clearObjects = false;
+  self.bind("update", function() {
+    return updating = true;
+  });
+  self.bind("afterUpdate", function() {
+    updating = false;
+    if (clearObjects) {
+      self.objects().clear();
+      return clearObjects = false;
+    }
+  });
+  return {
+    /**
+    Loads a new may and unloads any existing map or entities.
+
+    @name loadMap
+    @methodOf Engine#
+    */
+    loadMap: function(name, complete) {
+      clearObjects = updating;
+      return map = Tilemap.load({
+        name: name,
+        complete: complete,
+        entity: self.add
+      });
+    }
+  };
+};
+;
+/**
 The <code>Fadeable</code> module provides a method to fade a sprite to transparent. 
 You may also provide a callback function that is executed when the sprite has finished fading out.
 
@@ -7721,6 +8095,64 @@ Flickerable = function(I, self) {
       I.flickerDuration = duration;
       I.flickerFrequency = frequency;
       return I.flickerAlpha = alpha;
+    }
+  };
+};
+;
+/**
+The Follow module provides a simple method to set an object's
+velocity so that it will approach another object. 
+
+The calculated velocity is based on the center point of 
+each object.
+
+This method relies on both objects having `position` methods. 
+All GameObjects have this method by default.
+
+<code><pre>
+player = GameObject
+  x: 50
+  y: 50
+  width: 10
+  height: 10
+
+enemy = GameObject
+  x: 100
+  y: 50
+  width: 10
+  height: 10
+  velocity: Point(0, 0)
+
+# Make an enemy follow the player
+enemy.follow(player)
+
+# now the enemy's velocity will point toward the player
+enemy.I.velocity
+# => Point(-1, 0)
+
+enemy.update()
+
+enemy.I.x
+# => 99
+</pre></code>
+
+@name Follow
+@module
+@constructor
+@param {Object} I Instance variables
+@param {Core} self Reference to including object
+*/
+var Follow;
+
+Follow = function(I, self) {
+  if (I == null) I = {};
+  Object.reverseMerge(I, {
+    followSpeed: 1,
+    velocity: Point(0, 0)
+  });
+  return {
+    follow: function(obj) {
+      return I.velocity = obj.position().subtract(self.position()).norm().scale(I.followSpeed);
     }
   };
 };
@@ -7883,7 +8315,7 @@ GameObject = function(I) {
       return I.active = false;
     }
   });
-  defaultModules = [Bindable, Bounded, Drawable, Durable];
+  defaultModules = [Bindable, Bounded, Cooldown, Drawable, Durable];
   modules = defaultModules.concat(I.includedModules.invoke('constantize'));
   modules = modules.without(I.excludedModules.invoke('constantize'));
   modules.each(function(Module) {
@@ -7917,6 +8349,29 @@ GameObject.construct = function(entityData) {
   } else {
     return GameObject(entityData);
   }
+};
+;
+var GameOver;
+
+GameOver = function(I) {
+  var self;
+  if (I == null) I = {};
+  self = TextScreen(I);
+  self.bind('update', function() {
+    if (justPressed.any) {
+      return engine.delay(15, function() {
+        return engine.setState(TitleScreen());
+      });
+    }
+  });
+  self.bind("overlay", function(canvas) {
+    self.centerText(canvas, "Game Over");
+    return self.centerText(canvas, "Press any key to restart", {
+      size: 12,
+      y: App.height / 2 + 30
+    });
+  });
+  return self;
 };
 ;
 var GameState;
@@ -7975,9 +8430,9 @@ GameState = function(I) {
       return object.update();
     }), I.objects = _ref[0], toRemove = _ref[1];
     toRemove.invoke("trigger", "remove");
-    I.updating = false;
     I.objects = I.objects.concat(queuedObjects);
-    return queuedObjects = [];
+    queuedObjects = [];
+    return I.updating = false;
   });
   self.include(GameState.Cameras);
   self.include(GameState.SaveState);
@@ -8142,6 +8597,26 @@ GameState.SingleCamera = function(I, self) {
   return {};
 };
 ;
+var LevelState;
+
+LevelState = function(I) {
+  var self;
+  if (I == null) I = {};
+  Object.reverseMerge(I, {
+    level: 'level1'
+  });
+  self = GameState(I);
+  self.bind("enter", function() {
+    engine.fadeIn({
+      duration: 10
+    });
+    return engine.loadMap(I.level, function() {
+      return engine.I.transitioning = false;
+    });
+  });
+  return self;
+};
+;
 /**
 The Movable module automatically updates the position and velocity of
 GameObjects based on the velocity and acceleration. It does not check
@@ -8198,6 +8673,20 @@ Movable = function(I, self) {
     I.x += I.velocity.x;
     return I.y += I.velocity.y;
   });
+};
+;
+var Oscillator;
+
+Oscillator = function(options) {
+  var amplitude, offset, period;
+  if (options == null) options = {};
+  amplitude = options.amplitude, period = options.period, offset = options.offset;
+  if (amplitude == null) amplitude = 1;
+  if (period == null) period = 1;
+  if (offset == null) offset = 0;
+  return function(t) {
+    return amplitude * Math.cos(Math.TAU * t / period + offset);
+  };
 };
 ;
 /**
@@ -8443,5 +8932,114 @@ draw anything to the screen until the image has been loaded.
   };
   return (typeof exports !== "undefined" && exports !== null ? exports : this)["Sprite"] = Sprite;
 })();
+;
+var TextScreen;
+
+TextScreen = function(I) {
+  var self;
+  if (I == null) I = {};
+  Object.reverseMerge(I, {
+    font: 'Helvetica',
+    fontSize: 24,
+    fontColor: 'white',
+    yPosition: App.height / 2
+  });
+  return self = GameState(I).extend({
+    centerText: function(canvas, text, options) {
+      var color, font, size, yPosition;
+      if (options == null) options = {};
+      font = options.font || I.font;
+      size = options.size || I.fontSize;
+      color = options.color || I.fontColor;
+      yPosition = options.y || I.yPosition;
+      canvas.font("" + size + "px " + font);
+      return canvas.centerText({
+        y: yPosition,
+        text: text,
+        color: color
+      });
+    }
+  });
+};
+;
+
+(function() {
+  var Map, Tilemap, loadByName;
+  Map = function(data, entityCallback) {
+    var entity, loadEntities, spriteLookup, tileHeight, tileWidth, uuid, _ref;
+    tileHeight = data.tileHeight;
+    tileWidth = data.tileWidth;
+    spriteLookup = {};
+    _ref = App.entities;
+    for (uuid in _ref) {
+      entity = _ref[uuid];
+      spriteLookup[uuid] = Sprite.fromURL(entity.tileSrc);
+    }
+    loadEntities = function() {
+      if (!entityCallback) return;
+      console.log(data);
+      return data.layers.each(function(layer, layerIndex) {
+        var instance, instanceData, instances, x, y, _i, _len, _results;
+        if (instances = layer.instances) {
+          _results = [];
+          for (_i = 0, _len = instances.length; _i < _len; _i++) {
+            instance = instances[_i];
+            x = instance.x, y = instance.y, uuid = instance.uuid;
+            instanceData = Object.extend({
+              layer: layerIndex,
+              sprite: spriteLookup[uuid],
+              x: x + tileWidth / 2,
+              y: y + tileHeight / 2
+            }, App.entities[uuid], instance.properties);
+            _results.push(entityCallback(instanceData));
+          }
+          return _results;
+        }
+      });
+    };
+    loadEntities();
+    return data;
+  };
+  Tilemap = function(name, callback, entityCallback) {
+    return fromPixieId(App.Tilemaps[name], callback, entityCallback);
+  };
+  loadByName = function(name, callback, entityCallback) {
+    var proxy, url;
+    url = ResourceLoader.urlFor("tilemaps", name);
+    proxy = {};
+    $.getJSON(url, function(data) {
+      Object.extend(proxy, Map(data, entityCallback));
+      return typeof callback === "function" ? callback(proxy) : void 0;
+    });
+    return proxy;
+  };
+  Tilemap.load = function(options) {
+    if (options.pixieId) {
+      return fromPixieId(options.pixieId, options.complete, options.entity);
+    } else if (options.name) {
+      return loadByName(options.name, options.complete, options.entity);
+    }
+  };
+  return (typeof exports !== "undefined" && exports !== null ? exports : this)["Tilemap"] = Tilemap;
+})();
+;
+var TitleScreen;
+
+TitleScreen = function(I) {
+  var self;
+  if (I == null) I = {};
+  self = TextScreen(I);
+  self.bind('update', function() {
+    if (justPressed.any) return engine.nextLevel();
+  });
+  self.bind("overlay", function(canvas) {
+    self.centerText(canvas, App.name);
+    return self.centerText(canvas, "Press any key to start", {
+      size: 12,
+      y: App.height / 2 + 30
+    });
+  });
+  return self;
+};
 ;
 ;
